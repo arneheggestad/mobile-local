@@ -1,0 +1,46 @@
+/*
+ Dan Armendariz
+ Computer Science 76
+ Building Mobile Applications
+ Harvard Extension School
+ 
+ Simple CSS layout.
+
+*/
+
+article,header { display: block; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #c99;
+    font: 12px sans-serif;
+    height: 100%;
+}
+
+header {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+article {
+    border: 1px solid black;
+    width: 75%;
+    padding: 1em;
+    margin: 10px auto;
+    background-color: white;
+}
+
+article header {
+    text-align: left;
+    border-bottom: none;
+}
+
+article h1 {
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    font-weight: bold;
+}
