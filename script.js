@@ -29,6 +29,7 @@ $(document).ready(function() {
 	// Callback function
 	function showLoc(loc) {
 		// Display the user's location
+		console.log("Displaying geolocation...");
 		document.getElementById("currentloc").innerHTML = 
 			"Latitude: " + loc.coords.latitude + "<br />" +
 			"Longitude: " + loc.coords.longitude + "<br />";
