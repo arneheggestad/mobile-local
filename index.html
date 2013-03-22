@@ -55,40 +55,73 @@
 			"Longitude: " + locLng + "<br />";
 
 			// run reverse geocoding to get the address
-			geocode(locLat, locLng, sensor, function(response) {
-				console.log("Got the address!");
-				// do something with the address
-			});
+			geocode(locLat, locLng, sensor);
 	}
 
 	// Geocoding function
-	function geocode(lat, lng, sensor, f) {
+	function geocode(lat, lng, sensor) {
 		console.log("Geocoding...");
 
 		// build the url to ask YQL about
-		// var url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=" + sensor;
-		// encode the url
-		// var encodedURL = encodeURIComponent(url);
-		// build the full YQL query; these can probably be combined
-		// var query = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20json%20where%20url%3D%22" + encodedURL + "&format=json\"";
-		var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20json%20where%20url%3D%22http%3A%2F%2Fmaps.googleapis.com%2Fmaps%2Fapi%2Fgeocode%2Fjson%3Flatlng%3D' + lat + '%2C' + lng + '%26sensor%3D' + sensor + '%22&format=json';
-		alert(query);
-		console.log("Asking YQL about:\t" + query);
+		var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng + '&sensor=' + sensor;
+		
+		var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20json%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json';
+
 		$.getJSON(query, function(response) {
-			console.log("Asked YQL about:\t" + query);
+			console.log("Geocode lookup. Asked:\n" + query);
+			console.log(JSON.stringify(response));
+			
+			// zipcode will only work for US addresses
+			// must fix this later!
+			var zipcode = response.query.results.json.results[0].address_components[7].short_name;
+			console.log(zipcode);
+			$('#query').val(zipcode);
+			});
+	}
+
+/* let's comment this out for now
+	// Generic YQL query function
+	function askYQL(url, f) {
+		var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20json%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json';
+	
+		$.getJSON(query, function(response) {
+			console.log("Asked YQL about:\n" + query);
 			if(response.query.results == null) {
+				console.log("Null results");
 				return false;
 			} else {
-				f(response);
+				console.log(JSON.stringify(response));
+				console.log("Returning results from getJSON");
 			}
 			});
-		}
-
+	}
+*/
 
 	// Retrieve news and append to index.html
+	function getNews(loc, f) {
+		var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%20%3D%20%22http%3A%2F%2Fnews.google.com%2Fnews%3Fgeo%3D' + loc + '%26output%3Drss%22&format=json';
+
+		$.getJSON(query, function(response) {
+			console.log("Retrieving news for " + loc + "...");
+			
+			// clear old news results?
+			$("#show-news").empty();
+
+			// append news items
+			$("#show-news").append("<ul>");
+			// let's make the news stories look nice (and be readable) with
+			// Instapaper's mobilizer
+			$.each(response.query.results.item, function() {
+				$("#show-news ul").append('<li><a href="http://www.instapaper.com/m?u=' + encodeURIComponent(this.link) + '" target="_blank">' + this.title + '</a></li>');
+
+			});
+		})
+	}
 
 	// Retrieve weather and append to index.html
+	function getWeather(loc, f) {
 
+	}
 
 
 </script>
@@ -107,9 +140,7 @@
 		<form id="locate-me">
 				<!-- Manual location entry -->
 				<input type="text" id="query" placeholder="Enter your location"/>
-				<input type="button" id="get-news-weather" value="What's new? How's the weather?" />
-				<!-- Automatic geolocation button -->
-				<input type="button" id="auto-locate" value="Computer, locate me"/>
+				<input type="button" id="get-news-weather" value="Get news and weather." onclick="getNews($('#query').val())"/>
 		</div>
 	</article>
 
@@ -121,14 +152,14 @@
 
 	</article>
 
-	<article id="news-results">
+	<article id="news-results" name="news">
 		<header>
 			<h1>Your Local News</h1>
 		</header>
 		<div id="show-news"></div>
 	</article>
 
-	<article id="weather-results">
+	<article id="weather-results" name="weather">
 		<header>
 			<h1>Your Local Weather</h1>
 		</header>
