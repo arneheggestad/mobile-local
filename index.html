@@ -78,40 +78,7 @@
 				geocodeWOEID(locLat, locLng);
 		}
 
-		// Geocoding function (google maps)
-		function geocode(lat, lng, sensor) {
-			console.log("Geocoding...");
-
-			// build the url to ask YQL about
-			var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng + '&sensor=' + sensor;
-			
-			var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20json%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json';
-
-			$.getJSON(query, function(response) {
-				console.log("Geocode lookup. Asked:\n" + query);
-				console.log(JSON.stringify(response));
-				
-				// zipcode will only work for US addresses
-				var loc = response.query.results.json.results[0].address_components[7].short_name;
-				console.log(loc);
-
-				if (loc == null) {
-					alert("There was an error finding your ZIP code. Please enter it in the box manually.");
-				} else {
-					$('#query').val(loc);
-
-				}
-
-
-				// an idea to get around zipcode problem
-				// search through the geocode results for country
-				// if US --> zipcode; if not --> city, state/prov, country
-				var country;
-
-
-				});
-		}
-
+		// use the YQL data tables 
 		function geocodeWOEID(lat, lng) {
 			var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.placefinder%20where%20text%3D%22' + lat + '%2C' + lng + '%22%20and%20gflags%3D%22R%22&format=json'
 
@@ -183,6 +150,7 @@
 			getNews(encodeURIComponent(loc));
 			var woeid = localStorage.getItem("woeid");
 			getWeather(woeid);
+			$.mobile.changePage("#results", {transition: "slide"});
 		}
 
 	</script>
@@ -191,39 +159,58 @@
 	</head>
 
 	<body onload="geolocate()">
-		<header>
-			<h1 id="mainhead">Mobile Local</h1>
-		</header>
+		<div data-role="header">
+			<header>
+				<h1 id="mainhead">Mobile Local</h1>
+			</header>
+		</div>
 
 		<!-- Form to input your location -->			
-		<article>
-			<div class="form">
-			<form id="locate-me">
-					<!-- Manual location entry -->
-					<input type="text" id="query" placeholder="Enter your location"/>
-					<input type="button" id="get-news-weather" value="Get news and weather." onclick="getAll($('#query').val())"/>
-			</div>
-		</article>
-
-		<article id="currentloc">
+		<div data-role="page" id="entryform">
 			<header>
-				<h1>Your Current Location</h1>
+				<h1 id="mainhead">Mobile Local</h1>
 			</header>
-			<div id="coords"></div>
 
-		</article>
+			<article>
+				<div class="form">
+				<form id="locate-me">
+						<!-- Manual location entry -->
+						<input type="text" id="query" placeholder="Enter your location"/>
+						<input type="button" id="get-news-weather" value="Get news and weather." onclick="getAll($('#query').val())"/>
+				</div>
+			</article>
 
-		<article id="news-results" name="news">
+			<article id="currentloc">
+				<header>
+					<h1>Your Current Location</h1>
+				</header>
+				<div id="coords"></div>
+
+			</article>
+		</div>
+
+		<div data-role="page" id="results">
 			<header>
-				<h1>Local News</h1>
+				<h1 id="mainhead">Mobile Local</h1>
 			</header>
-			<div id="show-news"></div>
-		</article>
 
-		<article id="weather-results" name="weather">
-			<header>
-				<h1>Local Weather</h1>
-			</header>
-			<div id="show-weather"></div>
-		</article>
+			<article id="news-results" name="news" class="col1">
+				<header>
+					<h1>Local News</h1>
+				</header>
+				<div id="show-news"></div>
+			</article>
+
+			<article id="weather-results" name="weather" class="col2">
+				<header>
+					<h1>Local Weather</h1>
+				</header>
+				<div id="show-weather" class="center"></div>
+			</article>
+		</div>
+
+		<div data-role="footer">
+			<footer>
+
+			</footer>
 	</body>
