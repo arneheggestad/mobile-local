@@ -87,17 +87,11 @@
 				console.log("Geocode lookup. Asked:\n" + query);
 
 				// zip vs city-state-country
-				var country = response.query.results.Result.country;
+				var country = response.query.results.Result.countrycode;
 
 				var city = response.query.results.Result.city;
-				var state = response.query.results.Result.state;
+				var state = response.query.results.Result.statecode;
 				var loc = "" + city + ", " + state + ", " + country;
-
-				// woeid for Yahoo Wather
-				var woeid = response.query.results.Result.woeid;
-				console.log("WOEID:\t" + woeid);
-
-				localStorage.setItem("woeid", woeid);
 
 				$('#query').val(loc);
 				$('#get-news-weather').click();
@@ -128,28 +122,39 @@
 
 		// Retrieve weather and append to index.html
 		function getWeather(loc, f) {
-			var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D%22http%3A%2F%2Fweather.yahooapis.com%2Fforecastrss%3Fw%3D' + loc + '%22&format=json';
+			var query = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.placefinder%20where%20text%3D%22' + encodeURIComponent(loc) + '%22%20and%20gflags%3D%22R%22&format=json'
 
 			$.getJSON(query, function(response) {
-				console.log("Retrieving weather for WOEID " + loc + "...");
+				console.log("WOEID lookup. Asked:\n" + query);
 
-				// clear old weather
-				$("#show-weather").empty();
+				// woeid for Yahoo Wather
+				var woeid = response.query.results.Result.woeid;
+				console.log("WOEID:\t" + woeid);
 
-				// append the weather
-				$.each(response.query.results, function() {
+				var queryWeath = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D%22http%3A%2F%2Fweather.yahooapis.com%2Fforecastrss%3Fw%3D' + woeid + '%22&format=json';
+
+				$.getJSON(queryWeath, function(response) {
+					console.log("Retrieving weather for WOEID " + loc + "...");
+
+					// clear old weather
+					$("#show-weather").empty();
+
+					// append the weather
+					$.each(response.query.results, function() {
 					$("#show-weather").append(this.description);
 
-				});
+					});
 		
+				});
 			});
-	}
+		}
 
 		function getAll(loc, f) {
 			$("#mainhead").replaceWith("<h1>" + loc + "</h1>");
+
 			getNews(encodeURIComponent(loc));
-			var woeid = localStorage.getItem("woeid");
-			getWeather(woeid);
+			getWeather(loc);
+
 			$.mobile.changePage("#results", {transition: "slide"});
 		}
 
